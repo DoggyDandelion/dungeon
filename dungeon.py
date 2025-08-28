@@ -24,10 +24,10 @@ class  Room:
     def update_action_list(self):
         i = 0
         for item in self.contents:
-            self.actions[i] = item
+            self.actions[str(i)] = item
             i += 1
         for door in self.doors:
-            self.actions[i] = door
+            self.actions[str(i)] = door
             i += 1
      
      # add door
@@ -53,8 +53,8 @@ class  Room:
       
      # take action      
     def action(self, action, character):
-        action = int(action)
-        room_code = self.actions[action].actioned(character)
+        action = action
+        room_code = self.actions[action].actioned(character, "fp")
         if room_code == "rm":
             self.contents.remove(self.actions[action])
             self.update_action_list()
@@ -93,7 +93,7 @@ class Character:
             actions = {}
             i = 0
             for item in self.items:
-                actions[i] = item
+                actions[str(i)] = item
                 i += 1
             # list items
             i = 0
@@ -110,23 +110,28 @@ class Item:
     self,
     name: str,
     description: str,
+    investigated_description: str,
     mod: float,
     stat: str
     ):
         self.name = name
         self.description = description
+        self.investigated_description = investigated_description
         self.mod = mod
         self.stat = stat
     
     def actioned(self, character, tag):
         # when an item is actioned certain tags define how it was actioned. The list of tags is here for now.
-        # bp (backpack ) actioned from the pack of the actioning character
-        # fp (first pickup) this is the first time the item has been picked up
-        # np (normal pickup) item has already been picked up
-        # ni (normal investigate) display info without adding to pack
-        character.mod(self.mod, self.stat)
-        character.items.append(self)
-        return "rm"
+        # bp: item was actioned from backpack
+        # fp: item was picked up from floor
+        # fi: item was investigated from floor
+        if tag == "bp" or tag == "fi":
+            print(self.investigated_description)
+            return ""
+        elif tag == "fp":
+            character.mod(self.mod, self.stat)
+            character.items.append(self)
+            return "rm"
 
         
 # Door class
@@ -167,6 +172,7 @@ start_room = Room(
 "A small cobled room with no windows, and a staircase made of the same coble stone dimmly lit by torches leading downwards",
 [Item(
 "Sward",
+"This Stone Sward looks like it has seen better days, with chips in the blade and scratches on the handle it has slayed many beasts",
 "Stone Sward, +5 atk",
 0.05,
 "atk")
@@ -193,7 +199,7 @@ running = True
 # Main
 def main():
     # describe rules
-    print("The folowing actions are always avliable from the default menu\ni: lists items in backpack, and provides a menu to interact with them")
+    print("The folowing actions are always avliable from the default menu:\ni: lists items in backpack, and provides a menu to interact with them\n\n")
     player = Character(start_room)
     # game loop
     while running:

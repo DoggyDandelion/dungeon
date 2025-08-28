@@ -2,6 +2,7 @@
 #pylint:disable=W0613
 #pylint:disable=W0122
 #pylint:disable=W0102
+# this is a test
 
 # room, whats is it etc
 class  Room:
